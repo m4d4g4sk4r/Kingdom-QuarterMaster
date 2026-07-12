@@ -23,6 +23,7 @@ where = ["src"]
 
 [project.optional-dependencies]
 dev = ["pytest~=9.1", "ruff~=0.9"]
+ui = ["fastapi>=0.115", "uvicorn>=0.34"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
