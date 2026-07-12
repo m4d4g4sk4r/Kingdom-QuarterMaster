@@ -1,0 +1,112 @@
+"""Fetches and caches static game data from valorant-api.com (no auth needed).
+
+Cache is keyed by the current riotClientVersion so it invalidates automatically
+after a game patch. Only reads/writes files under the user cache dir; never
+touches player tokens or credentials.
+"""
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+from .config import KINGDOM_CREDITS_UUID_FALLBACK, VALORANT_API_BASE, user_cache_dir
+
+
+class StaticDataError(RuntimeError):
+    """Raised when valorant-api.com returns something we don't understand."""
+
+
+@dataclass
+class StaticData:
+    version: str
+    agents_by_uuid: dict
+    contracts: list
+    kingdom_credits_uuid: str
+
+
+def _get_json(client, path: str) -> Any:
+    resp = client.get(f"{VALORANT_API_BASE}{path}")
+    resp.raise_for_status()
+    body = resp.json()
+    if "data" not in body:
+        raise StaticDataError(
+            f"valorant-api.com response for {path} missing 'data' key — "
+            "the public API schema may have changed."
+        )
+    return body["data"]
+
+
+def fetch_client_version(client) -> str:
+    data = _get_json(client, "/version")
+    version = data.get("riotClientVersion")
+    if not version:
+        raise StaticDataError(
+            "valorant-api.com /version response missing 'riotClientVersion'."
+        )
+    return version
+
+
+def _cache_path(version: str) -> Path:
+    safe_version = version.replace("/", "_")
+    return user_cache_dir() / f"static_{safe_version}.json"
+
+
+def load_static_data(client, force_refresh: bool = False) -> StaticData:
+    """Fetch (or load from disk cache) agents/contracts/currencies.
+
+    `client` is any object exposing `.get(url) -> response` with `.raise_for_status()`
+    and `.json()` (an httpx.Client in production, a fake in tests).
+    """
+    version = fetch_client_version(client)
+    cache_file = _cache_path(version)
+
+    if not force_refresh and cache_file.exists():
+        try:
+            cached = json.loads(cache_file.read_text(encoding="utf-8"))
+            return StaticData(
+                version=cached["version"],
+                agents_by_uuid=cached["agents_by_uuid"],
+                contracts=cached["contracts"],
+                kingdom_credits_uuid=cached["kingdom_credits_uuid"],
+            )
+        except (json.JSONDecodeError, OSError, KeyError):
+            pass  # fall through to a live refetch
+
+    agents = _get_json(client, "/agents?isPlayableCharacter=true")
+    contracts = _get_json(client, "/contracts")
+    currencies = _get_json(client, "/currencies")
+
+    agents_by_uuid = {a["uuid"]: a for a in agents}
+
+    kc_uuid = KINGDOM_CREDITS_UUID_FALLBACK
+    for currency in currencies:
+        if currency.get("displayName") == "Kingdom Credits":
+            kc_uuid = currency["uuid"]
+            break
+
+    data = StaticData(
+        version=version,
+        agents_by_uuid=agents_by_uuid,
+        contracts=contracts,
+        kingdom_credits_uuid=kc_uuid,
+    )
+
+    try:
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
+        cache_file.write_text(
+            json.dumps(
+                {
+                    "version": data.version,
+                    "agents_by_uuid": data.agents_by_uuid,
+                    "contracts": data.contracts,
+                    "kingdom_credits_uuid": data.kingdom_credits_uuid,
+                }
+            ),
+            encoding="utf-8",
+        )
+    except OSError:
+        pass  # caching is best-effort; a failure here shouldn't break the tool
+
+    return data
