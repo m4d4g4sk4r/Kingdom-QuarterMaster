@@ -24,6 +24,9 @@ KC balance — which purchases give you the most value right now.
   spent, given your current balance and reward-type weights.
 - `kqm recommend --goal <name>` — cheapest path to fully unlock (and
   recruit, if needed) one specific agent's gear.
+- `kqm ui` — starts a local, `127.0.0.1`-only web API (same data as above,
+  as JSON) and opens it in your browser. Add `--mock` to serve fixture
+  data instead of live data, so you can try it without VALORANT running.
 
 It never purchases, activates, or modifies anything — every request it
 makes is an HTTP `GET`.
@@ -59,7 +62,8 @@ py -3 -m venv .venv
 pip install -e .
 ```
 
-This installs the `kqm` command.
+This installs the `kqm` command. For the local web UI (`kqm ui`), install
+the extra dependencies too: `pip install -e ".[ui]"`.
 
 ## Run
 
@@ -70,7 +74,12 @@ kqm unlocked
 kqm recommend
 kqm recommend --goal Gekko
 kqm recommend --weight buddy=10 --weight spray=0
+kqm ui                # opens http://127.0.0.1:8420, live data
+kqm ui --mock         # same, but with fixture data — no VALORANT required
 ```
+
+Once running, `kqm ui` also serves interactive API docs at `/docs`
+(Swagger UI) and `/redoc`.
 
 If shard/region auto-detection fails, pass it explicitly:
 
@@ -106,14 +115,18 @@ file on disk — only static game-data cache and these preferences.
 
 ```
 src/kqm/
-  __main__.py     CLI entry (status, locked, unlocked, recommend)
+  __main__.py     CLI entry (status, locked, unlocked, recommend, ui)
   auth.py         lockfile discovery, local token fetch, shard detection
   riot_client.py  GET-only pd.pvp.net client, 401-retry-once
   static_data.py  valorant-api.com fetch + on-disk cache (by client version)
   reconcile.py    pure: live progression + static tiers -> per-agent model
   recommend.py    pure: greedy plan / goal-mode plan
   render.py       rich tables
-tests/               unit tests for reconcile.py and recommend.py, fixture-based, no network
+  service.py      fetch_snapshot() - shared orchestration for CLI + web API,
+                   with a --mock mode backed by tests/fixtures/
+  webapp.py       127.0.0.1-only FastAPI app (GET-only) used by `kqm ui`
+tests/               unit tests for reconcile.py, recommend.py, service.py and
+                     webapp.py, fixture-based, no network
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how local auth works
