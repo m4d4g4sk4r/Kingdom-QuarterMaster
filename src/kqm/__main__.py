@@ -5,6 +5,7 @@ either 127.0.0.1 (local Riot Client), pd.{shard}.a.pvp.net (Riot's player
 data endpoints), or valorant-api.com (public static game data). It never
 prompts for a username or password.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -34,8 +35,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="kqm",
         description=(
-            "Kingdom Quartermaster: local, read-only Valorant agent gear "
-            "(contract) tracker."
+            "Kingdom Quartermaster: local, read-only Valorant agent gear (contract) tracker."
         ),
     )
     parser.add_argument(
@@ -140,9 +140,7 @@ def main() -> None:
 
     balance = wallet["Balances"].get(static_data.kingdom_credits_uuid, 0)
 
-    agents = reconcile(
-        static_data.agents_by_uuid, static_data.contracts, contracts_response, owned
-    )
+    agents = reconcile(static_data.agents_by_uuid, static_data.contracts, contracts_response, owned)
 
     user_config = config.UserConfig.load()
 
@@ -173,4 +171,3 @@ def main() -> None:
         else:
             plan = greedy_plan(agents, balance, weights=weights)
             render_greedy_plan(console, plan, balance)
-

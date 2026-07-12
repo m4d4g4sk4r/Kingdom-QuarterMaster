@@ -4,6 +4,7 @@ Values here are verified against https://valapidocs.techchrism.me/ and
 https://valorant-api.com/ as of the time this tool was written. Riot patches
 can change any of these without notice — see README "API notes".
 """
+
 from __future__ import annotations
 
 import json
@@ -86,7 +87,7 @@ class UserConfig:
     agent_recruit_cost_kc: int = AGENT_RECRUIT_COST_KC
 
     @classmethod
-    def load(cls, path: Path | None = None) -> "UserConfig":
+    def load(cls, path: Path | None = None) -> UserConfig:
         path = path or (user_config_dir() / "config.json")
         if not path.exists():
             return cls()
@@ -99,9 +100,7 @@ class UserConfig:
         weights = dict(cfg.reward_weights)
         weights.update(data.get("reward_weights", {}))
         cfg.reward_weights = weights
-        cfg.agent_recruit_cost_kc = data.get(
-            "agent_recruit_cost_kc", cfg.agent_recruit_cost_kc
-        )
+        cfg.agent_recruit_cost_kc = data.get("agent_recruit_cost_kc", cfg.agent_recruit_cost_kc)
         return cfg
 
     def save(self, path: Path | None = None) -> None:

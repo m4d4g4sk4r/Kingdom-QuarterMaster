@@ -4,6 +4,7 @@ Deliberately exposes no way to issue a POST/PUT/DELETE to a Riot player
 endpoint — only `get_wallet`, `get_contracts`, and `get_owned_items` exist,
 and each of them issues exactly one `client.get(...)` call.
 """
+
 from __future__ import annotations
 
 import base64

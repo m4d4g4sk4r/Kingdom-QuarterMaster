@@ -5,6 +5,7 @@ only reads the lockfile Riot Client itself writes to disk while running,
 and uses it to call two local-only endpoints on 127.0.0.1. Nothing here
 ever contacts a remote Riot auth server.
 """
+
 from __future__ import annotations
 
 import base64
@@ -17,18 +18,10 @@ from pathlib import Path
 from .config import SHARD_CHOICES
 
 DEFAULT_LOCKFILE_PATH = (
-    Path(os.environ.get("LOCALAPPDATA", ""))
-    / "Riot Games"
-    / "Riot Client"
-    / "Config"
-    / "lockfile"
+    Path(os.environ.get("LOCALAPPDATA", "")) / "Riot Games" / "Riot Client" / "Config" / "lockfile"
 )
 DEFAULT_SHOOTERGAME_LOG_PATH = (
-    Path(os.environ.get("LOCALAPPDATA", ""))
-    / "VALORANT"
-    / "Saved"
-    / "Logs"
-    / "ShooterGame.log"
+    Path(os.environ.get("LOCALAPPDATA", "")) / "VALORANT" / "Saved" / "Logs" / "ShooterGame.log"
 )
 
 _SHARD_LOG_RE = re.compile(
@@ -88,7 +81,7 @@ def read_lockfile(path: Path | None = None) -> LockfileInfo:
 
 
 def _local_auth_header(password: str) -> str:
-    token = base64.b64encode(f"riot:{password}".encode("utf-8")).decode("ascii")
+    token = base64.b64encode(f"riot:{password}".encode()).decode("ascii")
     return f"Basic {token}"
 
 

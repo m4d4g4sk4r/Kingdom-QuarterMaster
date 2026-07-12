@@ -4,6 +4,7 @@ progression/entitlements into a per-agent unlocked/locked gear model.
 Nothing in this module performs I/O — it only transforms already-fetched
 data, which makes it straightforward to unit test against fixtures.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -139,8 +140,7 @@ def reconcile(
                 )
             if owned is False and unlocked:
                 status.discrepancies.append(
-                    f"Tier {i} ({raw_type}) is marked unlocked but not found in "
-                    "owned entitlements."
+                    f"Tier {i} ({raw_type}) is marked unlocked but not found in owned entitlements."
                 )
 
         results.append(status)

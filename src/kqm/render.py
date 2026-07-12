@@ -1,4 +1,5 @@
 """Rich-table rendering for CLI output. No business logic lives here."""
+
 from __future__ import annotations
 
 from rich.console import Console

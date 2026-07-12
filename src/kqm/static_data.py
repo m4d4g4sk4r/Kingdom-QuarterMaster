@@ -4,6 +4,7 @@ Cache is keyed by the current riotClientVersion so it invalidates automatically
 after a game patch. Only reads/writes files under the user cache dir; never
 touches player tokens or credentials.
 """
+
 from __future__ import annotations
 
 import json
@@ -42,9 +43,7 @@ def fetch_client_version(client) -> str:
     data = _get_json(client, "/version")
     version = data.get("riotClientVersion")
     if not version:
-        raise StaticDataError(
-            "valorant-api.com /version response missing 'riotClientVersion'."
-        )
+        raise StaticDataError("valorant-api.com /version response missing 'riotClientVersion'.")
     return version
 
 

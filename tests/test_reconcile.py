@@ -111,7 +111,8 @@ def test_recruited_flag_true_via_progression_even_without_owned_entitlement(
     # here, but has progressed past level 0.
     live_contracts_fade_progressed = {
         "Contracts": [
-            c if c["ContractDefinitionID"] != "7ab88318-4707-407a-9723-fb897d3e9ea1"
+            c
+            if c["ContractDefinitionID"] != "7ab88318-4707-407a-9723-fb897d3e9ea1"
             else {**c, "ProgressionLevelReached": 2}
             for c in load("contracts.json")["Contracts"]
         ]
