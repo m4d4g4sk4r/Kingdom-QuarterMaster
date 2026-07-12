@@ -22,7 +22,7 @@ KC balance — which purchases give you the most value right now.
   cost.
 - `kqm recommend` — greedy purchase plan that maximizes reward value per KC
   spent, given your current balance and reward-type weights.
-- `kqm recommend --goal agent:<name>` — cheapest path to fully unlock (and
+- `kqm recommend --goal <name>` — cheapest path to fully unlock (and
   recruit, if needed) one specific agent's gear.
 
 It never purchases, activates, or modifies anything — every request it
@@ -68,7 +68,7 @@ kqm status
 kqm locked
 kqm unlocked
 kqm recommend
-kqm recommend --goal agent:Gekko
+kqm recommend --goal Gekko
 kqm recommend --weight buddy=10 --weight spray=0
 ```
 

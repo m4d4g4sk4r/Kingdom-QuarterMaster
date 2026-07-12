@@ -57,7 +57,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     sub.add_parser("unlocked", help="List all already-unlocked gear per agent.")
 
     rec = sub.add_parser("recommend", help="Recommend purchases based on current KC balance.")
-    rec.add_argument("--goal", help='Goal mode, e.g. "agent:Gekko"', default=None)
+    rec.add_argument(
+        "--goal", help='Agent name to plan a full unlock for, e.g. "Gekko"', default=None
+    )
     rec.add_argument(
         "--weight",
         action="append",
@@ -153,10 +155,7 @@ def main() -> None:
     elif args.command == "recommend":
         weights = _parse_weight_overrides(args.weight, user_config.reward_weights)
         if args.goal:
-            if not args.goal.startswith("agent:"):
-                console.print('[red]--goal must look like "agent:<name>"[/red]')
-                sys.exit(1)
-            target = args.goal.split(":", 1)[1]
+            target = args.goal
             plan = goal_plan(
                 agents,
                 target,
