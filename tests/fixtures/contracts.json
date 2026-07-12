@@ -1,0 +1,36 @@
+{
+  "Version": 7,
+  "Subject": "test-puuid-0001",
+  "Contracts": [
+    {
+      "ContractDefinitionID": "9c0bfe80-4c9e-4a1e-8b9a-1234567890ab",
+      "ContractProgression": {
+        "TotalProgressionEarned": 9000,
+        "TotalProgressionEarnedVersion": 3,
+        "HighestRewardedLevel": {
+          "9c0bfe80-4c9e-4a1e-8b9a-1234567890ab": {"Amount": 3, "Version": 3}
+        }
+      },
+      "ProgressionLevelReached": 3,
+      "ProgressionTowardsNextLevel": 500
+    },
+    {
+      "ContractDefinitionID": "7ab88318-4707-407a-9723-fb897d3e9ea1",
+      "ContractProgression": {
+        "TotalProgressionEarned": 0,
+        "TotalProgressionEarnedVersion": 1,
+        "HighestRewardedLevel": {}
+      },
+      "ProgressionLevelReached": 0,
+      "ProgressionTowardsNextLevel": 0
+    }
+  ],
+  "ProcessedMatches": [],
+  "ActiveSpecialContract": "9c0bfe80-4c9e-4a1e-8b9a-1234567890ab",
+  "Missions": [],
+  "MissionMetadata": {
+    "NPECompleted": true,
+    "WeeklyCheckpoint": "2026-07-07T00:00:00.000Z",
+    "WeeklyRefillTime": "2026-07-14T00:00:00.000Z"
+  }
+}

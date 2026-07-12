@@ -1,0 +1,105 @@
+[
+  {
+    "uuid": "9c0bfe80-4c9e-4a1e-8b9a-1234567890ab",
+    "displayName": "Gekko Gear",
+    "content": {
+      "relationType": "Agent",
+      "relationUuid": "e370fa57-4757-3604-3648-499e1f642d3f",
+      "chapters": [
+        {
+          "isEpilogue": false,
+          "freeRewards": null,
+          "levels": [
+            {
+              "reward": {"type": "Spray", "uuid": "spray-gekko-1", "amount": 1, "isHighlighted": false},
+              "xp": 2000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 1000, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "PlayerCard", "uuid": "card-gekko-1", "amount": 1, "isHighlighted": false},
+              "xp": 4000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 2000, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "Title", "uuid": "title-gekko-1", "amount": 1, "isHighlighted": false},
+              "xp": 6000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 1500, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "EquippableCharmLevel", "uuid": "buddy-gekko-1", "amount": 1, "isHighlighted": false},
+              "xp": 8000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 3000, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "Spray", "uuid": "spray-gekko-2", "amount": 1, "isHighlighted": false},
+              "xp": 10000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 1000, "isPurchasableWithDough": true
+            }
+          ]
+        },
+        {
+          "isEpilogue": false,
+          "freeRewards": null,
+          "levels": [
+            {
+              "reward": {"type": "PlayerCard", "uuid": "card-gekko-2", "amount": 1, "isHighlighted": false},
+              "xp": 12000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 2000, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "Spray", "uuid": "spray-gekko-3", "amount": 1, "isHighlighted": false},
+              "xp": 14000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 1000, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "Title", "uuid": "title-gekko-2", "amount": 1, "isHighlighted": false},
+              "xp": 16000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 1500, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "EquippableCharmLevel", "uuid": "buddy-gekko-2", "amount": 1, "isHighlighted": false},
+              "xp": 18000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 3000, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "EquippableSkinLevel", "uuid": "skin-gekko-1", "amount": 1, "isHighlighted": true},
+              "xp": 20000, "vpCost": 200, "isPurchasableWithVP": true,
+              "doughCost": 5000, "isPurchasableWithDough": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "uuid": "7ab88318-4707-407a-9723-fb897d3e9ea1",
+    "displayName": "Fade Gear",
+    "content": {
+      "relationType": "Agent",
+      "relationUuid": "dade69b4-4f5a-8528-247b-219e5a1facd6",
+      "chapters": [
+        {
+          "isEpilogue": false,
+          "freeRewards": null,
+          "levels": [
+            {
+              "reward": {"type": "Spray", "uuid": "spray-fade-1", "amount": 1, "isHighlighted": false},
+              "xp": 2000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 1000, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "PlayerCard", "uuid": "card-fade-1", "amount": 1, "isHighlighted": false},
+              "xp": 4000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 2000, "isPurchasableWithDough": true
+            },
+            {
+              "reward": {"type": "EquippableCharmLevel", "uuid": "buddy-fade-1", "amount": 1, "isHighlighted": false},
+              "xp": 6000, "vpCost": 0, "isPurchasableWithVP": false,
+              "doughCost": 3000, "isPurchasableWithDough": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
