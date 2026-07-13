@@ -34,3 +34,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `/api/recommend`, `/api/goal/{agent_name}`.
 - Fixture-based tests for the service layer and web API (13 additional
   tests).
+- Local web UI served by `kqm ui` — a Vite + React + Tailwind single-page
+  app (the "Kingdom Requisition Terminal") with a Dashboard (KC
+  authorization gauge + agent manifest grid), per-agent contract track,
+  a requisition planner (best-value and goal modes with live priority
+  weights), and dedicated screens for every error/offline state. Built
+  into `src/kqm/webui` and shipped as package data, so end users need no
+  Node at runtime. Read-only throughout: plans are drafts, never
+  transactions. Design direction recorded in `frontend/DESIGN_BRIEF.md`.

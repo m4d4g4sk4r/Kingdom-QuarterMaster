@@ -21,6 +21,11 @@ kqm = "kqm.__main__:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+# Ship the built web UI (frontend/ -> src/kqm/webui via `npm run build`) so
+# `kqm ui` serves it with no Node at runtime.
+kqm = ["webui/**/*"]
+
 [project.optional-dependencies]
 dev = ["pytest~=9.1", "ruff~=0.9"]
 ui = ["fastapi>=0.115", "uvicorn>=0.34"]

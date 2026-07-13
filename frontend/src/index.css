@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Kingdom Requisition Terminal — design tokens
+ * See frontend/DESIGN_BRIEF.md. Chrome is institutional greyscale;
+ * saturated color enters only where an agent does (runtime gradients).
+ * ------------------------------------------------------------------ */
+@theme {
+  --color-ink: #0c0f11;
+  --color-steel: #151a1d;
+  --color-plate: #1e252a;
+  --color-line: #2a343a;
+  --color-paper: #e8e4d9;
+  --color-muted: #8a9499;
+  --color-amber: #e6a23c;
+  --color-issued: #6fa06a;
+  --color-oxide: #c4553d;
+
+  --font-display: "Chakra Petch", "Segoe UI", sans-serif;
+  --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "Consolas", monospace;
+
+  --radius: 0px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-feature-settings: "tnum" 1;
+    -webkit-font-smoothing: antialiased;
+    /* faint ledger hairline wash — barely-there structure, not decoration */
+    background-image:
+      linear-gradient(var(--color-ink), var(--color-ink)),
+      repeating-linear-gradient(
+        0deg,
+        rgba(138, 148, 153, 0.025) 0px,
+        rgba(138, 148, 153, 0.025) 1px,
+        transparent 1px,
+        transparent 32px
+      );
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+
+  /* every number is a ledger figure */
+  .tnum {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgba(230, 162, 60, 0.3);
+    color: var(--color-paper);
+  }
+}
+
+/* thin institutional scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* stamp "set" on mount — the one flourish, reduced-motion safe */
+@keyframes stamp-set {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--stamp-rot, -2deg)) scale(1.35);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(var(--stamp-rot, -2deg)) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(var(--stamp-rot, -2deg)) scale(1);
+  }
+}

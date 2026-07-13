@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from kqm import webapp
 from kqm.webapp import create_app
 
 
@@ -9,10 +10,15 @@ def client():
     return TestClient(create_app(mock=True))
 
 
-def test_root_reports_ok(client):
+def test_root_serves_ui_or_api_welcome(client):
+    # `/` serves the built SPA when the frontend has been built into
+    # src/kqm/webui, otherwise a JSON welcome. Both are a healthy 200.
     resp = client.get("/")
     assert resp.status_code == 200
-    assert resp.json()["status"] == "ok"
+    if webapp._INDEX_HTML.exists():
+        assert "text/html" in resp.headers["content-type"]
+    else:
+        assert resp.json()["status"] == "ok"
 
 
 def test_snapshot_endpoint_returns_reconciled_agents(client):
