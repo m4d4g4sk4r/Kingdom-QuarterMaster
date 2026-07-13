@@ -45,3 +45,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `kqm ui --mock` serves a fuller self-contained demo roster (varied
   progression, recruitment gaps, a discrepancy) so the UI can be explored
   and screenshotted without VALORANT; unit-test fixtures stay minimal.
+- Kingdom Quartermaster branding: an angular crest logo (`docs/logo.svg`,
+  used in the README and web UI header) and a pre-rendered ANSI wordmark
+  banner shown above `kqm --help` / `kqm -h`. The banner is embedded as a
+  constant styled with `rich` (colour stripped when piped) — the base CLI
+  gains no image or figlet dependency.

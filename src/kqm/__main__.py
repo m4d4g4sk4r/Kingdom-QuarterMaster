@@ -24,8 +24,18 @@ from .static_data import StaticDataError
 console = Console()
 
 
+class _BannerParser(argparse.ArgumentParser):
+    """Top-level parser that prints the branding banner above `--help`/`-h`."""
+
+    def print_help(self, file=None) -> None:
+        from .branding import render_banner
+
+        render_banner(console)
+        super().print_help(file)
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _BannerParser(
         prog="kqm",
         description=(
             "Kingdom Quartermaster: local, read-only Valorant agent gear (contract) tracker."
@@ -43,7 +53,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Force-refetch static game data instead of using the on-disk cache.",
     )
 
-    sub = parser.add_subparsers(dest="command", required=True)
+    # Plain subparsers so the banner only appears on the top-level `kqm --help`,
+    # not on every `kqm <command> --help`.
+    sub = parser.add_subparsers(dest="command", required=True, parser_class=argparse.ArgumentParser)
 
     sub.add_parser("status", help="Show a summary of unlocked/locked tier counts per agent.")
     sub.add_parser("locked", help="List all not-yet-unlocked gear per agent, with KC cost.")
