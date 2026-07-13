@@ -7,9 +7,11 @@ meant to be reachable from anywhere but the machine running it.
 from __future__ import annotations
 
 from dataclasses import asdict
+from pathlib import Path
 
 from fastapi import FastAPI, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from . import config
 from .auth import LocalApiUnavailableError, LockfileNotFoundError, ShardDetectionError
@@ -17,6 +19,12 @@ from .recommend import goal_plan, greedy_plan
 from .riot_client import RiotApiError, SchemaDriftError
 from .service import fetch_snapshot, parse_weight_overrides
 from .static_data import StaticDataError
+
+# Built Vite SPA, emitted here by `npm run build` (frontend/) and shipped as
+# package data. Absent in a source checkout that hasn't built the frontend —
+# in that case the API still works and `/` returns a JSON welcome.
+_WEBUI_DIR = Path(__file__).resolve().parent / "webui"
+_INDEX_HTML = _WEBUI_DIR / "index.html"
 
 # Order matters: SchemaDriftError is a RiotApiError subclass, but both are
 # registered explicitly with FastAPI so each gets its own status/code rather
@@ -65,13 +73,16 @@ def create_app(
     for exc_type in _ERROR_STATUS:
         app.add_exception_handler(exc_type, _handle_known_error)
 
-    @app.get("/")
-    def root():
-        return {
-            "status": "ok",
-            "message": "Kingdom Quartermaster local API. See /api/snapshot, "
-            "/api/recommend, /api/goal/{agent_name}.",
-        }
+    if not _INDEX_HTML.exists():
+
+        @app.get("/")
+        def root():
+            return {
+                "status": "ok",
+                "message": "Kingdom Quartermaster local API. See /api/snapshot, "
+                "/api/recommend, /api/goal/{agent_name}. Build the frontend "
+                "(cd frontend && npm run build) to serve the web UI here.",
+            }
 
     @app.get("/api/snapshot")
     def get_snapshot():
@@ -108,6 +119,29 @@ def create_app(
                 },
             )
         return {"balance": snapshot.balance, "plan": asdict(plan)}
+
+    # Serve the built SPA (if present). The API routes above and FastAPI's own
+    # /docs, /openapi.json, /redoc are registered first, so they take precedence
+    # over the client-route catch-all below.
+    if _INDEX_HTML.exists():
+        assets_dir = _WEBUI_DIR / "assets"
+        if assets_dir.is_dir():
+            app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+        @app.get("/")
+        def spa_index():
+            return FileResponse(_INDEX_HTML)
+
+        @app.get("/{full_path:path}")
+        def spa_fallback(full_path: str):
+            # Unknown /api/* paths get a JSON 404, not the HTML shell.
+            if full_path.startswith("api/"):
+                return JSONResponse(
+                    status_code=404,
+                    content={"error": {"code": "not_found", "message": "No such endpoint."}},
+                )
+            # Everything else is a client-side route → serve the SPA shell.
+            return FileResponse(_INDEX_HTML)
 
     return app
 
