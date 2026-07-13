@@ -1,4 +1,4 @@
-"""CLI entry point. Commands: status, locked, unlocked, recommend.
+"""CLI entry point. Commands: status, locked, unlocked, recommend, ui.
 
 This tool is strictly read-only: every network call it makes is a GET to
 either 127.0.0.1 (local Riot Client), pd.{shard}.a.pvp.net (Riot's player
@@ -14,25 +14,28 @@ import sys
 from rich.console import Console
 
 from . import config
-from .auth import (
-    LocalApiUnavailableError,
-    LockfileNotFoundError,
-    ShardDetectionError,
-    detect_shard,
-    fetch_local_session,
-    read_lockfile,
-)
+from .auth import LocalApiUnavailableError, LockfileNotFoundError, ShardDetectionError
 from .recommend import goal_plan, greedy_plan
-from .reconcile import reconcile
 from .render import render_goal_plan, render_greedy_plan, render_status, render_tier_list
-from .riot_client import RiotApiError, RiotClient
-from .static_data import StaticDataError, load_static_data
+from .riot_client import RiotApiError
+from .service import fetch_snapshot, parse_weight_overrides
+from .static_data import StaticDataError
 
 console = Console()
 
 
+class _BannerParser(argparse.ArgumentParser):
+    """Top-level parser that prints the branding banner above `--help`/`-h`."""
+
+    def print_help(self, file=None) -> None:
+        from .branding import render_banner
+
+        render_banner(console)
+        super().print_help(file)
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _BannerParser(
         prog="kqm",
         description=(
             "Kingdom Quartermaster: local, read-only Valorant agent gear (contract) tracker."
@@ -50,9 +53,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Force-refetch static game data instead of using the on-disk cache.",
     )
 
-    sub = parser.add_subparsers(dest="command", required=True)
+    # Plain subparsers so the banner only appears on the top-level `kqm --help`,
+    # not on every `kqm <command> --help`.
+    sub = parser.add_subparsers(dest="command", required=True, parser_class=argparse.ArgumentParser)
 
-    sub.add_parser("status", help="Show a summary of unlocked/locked gear per agent.")
+    sub.add_parser("status", help="Show a summary of unlocked/locked tier counts per agent.")
     sub.add_parser("locked", help="List all not-yet-unlocked gear per agent, with KC cost.")
     sub.add_parser("unlocked", help="List all already-unlocked gear per agent.")
 
@@ -68,81 +73,51 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Override a reward-type weight, e.g. --weight buddy=10. Repeatable.",
     )
 
+    ui = sub.add_parser("ui", help="Start the local web UI (opens your browser).")
+    ui.add_argument(
+        "--mock",
+        action="store_true",
+        help="Serve fixture data instead of live Riot data — no VALORANT required.",
+    )
+    ui.add_argument(
+        "--port", type=int, default=8420, help="Port to serve the local UI on (default: 8420)."
+    )
+
     return parser
 
 
-def _parse_weight_overrides(raw: list[str], base: dict) -> dict:
-    weights = dict(base)
-    for item in raw:
-        if "=" not in item:
-            continue
-        kind, _, value = item.partition("=")
-        try:
-            weights[kind.strip()] = float(value.strip())
-        except ValueError:
-            continue
-    return weights
-
-
-def _build_client_and_session(shard_override: str | None):
-    import httpx
-
-    lockfile = read_lockfile()
-
-    # verify=False is required for this one call: the Riot Client's local
-    # API server uses a self-signed cert on 127.0.0.1. No other host is
-    # ever contacted with verification disabled.
-    with httpx.Client(verify=False, timeout=10.0) as local_client:
-        session = fetch_local_session(local_client, lockfile)
-        shard = shard_override or detect_shard(local_client, lockfile)
-
-    return lockfile, session, shard
+def _fetch_snapshot_or_exit(args: argparse.Namespace):
+    try:
+        return fetch_snapshot(shard_override=args.shard, force_refresh_static=args.refresh_static)
+    except (
+        LockfileNotFoundError,
+        LocalApiUnavailableError,
+        ShardDetectionError,
+        StaticDataError,
+        RiotApiError,
+    ) as e:
+        console.print(f"[red]{e}[/red]")
+        sys.exit(1)
 
 
 def main() -> None:
     parser = build_arg_parser()
     args = parser.parse_args()
 
-    import httpx
+    if args.command == "ui":
+        from .webapp import run_ui
 
-    try:
-        lockfile, session, shard = _build_client_and_session(args.shard)
-    except LockfileNotFoundError as e:
-        console.print(f"[red]{e}[/red]")
-        sys.exit(1)
-    except LocalApiUnavailableError as e:
-        console.print(f"[red]{e}[/red]")
-        sys.exit(1)
-    except ShardDetectionError as e:
-        console.print(f"[red]{e}[/red]")
-        sys.exit(1)
+        run_ui(
+            mock=args.mock,
+            port=args.port,
+            shard_override=args.shard,
+            force_refresh_static=args.refresh_static,
+        )
+        return
 
-    try:
-        with httpx.Client(timeout=15.0) as static_client:
-            static_data = load_static_data(static_client, force_refresh=args.refresh_static)
-    except StaticDataError as e:
-        console.print(f"[red]{e}[/red]")
-        sys.exit(1)
-
-    try:
-        with httpx.Client(timeout=15.0) as pd_client:
-            client = RiotClient(
-                http_client=pd_client,
-                shard=shard,
-                session=session,
-                lockfile=lockfile,
-                client_version=static_data.version,
-            )
-            wallet = client.get_wallet()
-            contracts_response = client.get_contracts()
-            owned = client.get_all_owned_item_uuids()
-    except RiotApiError as e:
-        console.print(f"[red]{e}[/red]")
-        sys.exit(1)
-
-    balance = wallet["Balances"].get(static_data.kingdom_credits_uuid, 0)
-
-    agents = reconcile(static_data.agents_by_uuid, static_data.contracts, contracts_response, owned)
+    snapshot = _fetch_snapshot_or_exit(args)
+    agents = snapshot.agents
+    balance = snapshot.balance
 
     user_config = config.UserConfig.load()
 
@@ -153,7 +128,7 @@ def main() -> None:
     elif args.command == "unlocked":
         render_tier_list(console, agents, "Unlocked Gear", locked=False)
     elif args.command == "recommend":
-        weights = _parse_weight_overrides(args.weight, user_config.reward_weights)
+        weights = parse_weight_overrides(args.weight, user_config.reward_weights)
         if args.goal:
             target = args.goal
             plan = goal_plan(
@@ -170,3 +145,7 @@ def main() -> None:
         else:
             plan = greedy_plan(agents, balance, weights=weights)
             render_greedy_plan(console, plan, balance)
+
+
+if __name__ == "__main__":
+    main()

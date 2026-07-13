@@ -22,3 +22,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `--goal` and `--weight` options), rendered with `rich`.
 - Fixture-based unit test suite (20 tests, no network access required).
 - CI: ruff lint + pytest across Python 3.10/3.11/3.12.
+- Shared `service.fetch_snapshot()` orchestration path used by both the CLI
+  and a new local-only FastAPI app (`kqm.webapp`), with a `--mock` mode that
+  serves fixture data instead of live Riot data (no VALORANT install
+  required).
+- Reward name/icon resolution (`buddies`, `sprays`, `playercards`,
+  `playertitles` from valorant-api.com) cached alongside existing static
+  data.
+- `kqm ui [--mock] [--port PORT]`: starts a `127.0.0.1`-only web API and
+  opens it in the browser. Read-only, GET-only routes: `/api/snapshot`,
+  `/api/recommend`, `/api/goal/{agent_name}`.
+- Fixture-based tests for the service layer and web API (13 additional
+  tests).
+- Local web UI served by `kqm ui` — a Vite + React + Tailwind single-page
+  app (the "Kingdom Requisition Terminal") with a Dashboard (KC
+  authorization gauge + agent manifest grid), per-agent contract track,
+  a requisition planner (best-value and goal modes with live priority
+  weights), and dedicated screens for every error/offline state. Built
+  into `src/kqm/webui` and shipped as package data, so end users need no
+  Node at runtime. Read-only throughout: plans are drafts, never
+  transactions. Design direction recorded in `frontend/DESIGN_BRIEF.md`.
+- `kqm ui --mock` serves a fuller self-contained demo roster (varied
+  progression, recruitment gaps, a discrepancy) so the UI can be explored
+  and screenshotted without VALORANT; unit-test fixtures stay minimal.
+- Kingdom Quartermaster branding: an angular crest logo (`docs/logo.svg`,
+  used in the README and web UI header) and a pre-rendered ANSI wordmark
+  banner shown above `kqm --help` / `kqm -h`. The banner is embedded as a
+  constant styled with `rich` (colour stripped when piped) — the base CLI
+  gains no image or figlet dependency.
