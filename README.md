@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.svg" width="92" alt="Kingdom Quartermaster crest"></p>
+
 <h1 align="center">Kingdom Quartermaster</h1>
 
 <p align="center"><em>Kingdom Corporation keeps the ledger. The Quartermaster issues the gear.</em></p>
