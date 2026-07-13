@@ -145,7 +145,14 @@ def fetch_snapshot(
     shard_override: str | None = None,
     force_refresh_static: bool = False,
     mock: bool = False,
+    demo: bool = False,
 ) -> Snapshot:
+    if demo:
+        # A fuller, self-contained roster for the web UI demo. Kept out of the
+        # unit-test path (mock) so test fixtures stay minimal.
+        from ._demo import build_demo_snapshot
+
+        return build_demo_snapshot()
     if mock:
         return _fetch_snapshot_mock()
     return _fetch_snapshot_live(shard_override, force_refresh_static)

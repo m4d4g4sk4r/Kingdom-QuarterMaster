@@ -42,3 +42,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   into `src/kqm/webui` and shipped as package data, so end users need no
   Node at runtime. Read-only throughout: plans are drafts, never
   transactions. Design direction recorded in `frontend/DESIGN_BRIEF.md`.
+- `kqm ui --mock` serves a fuller self-contained demo roster (varied
+  progression, recruitment gaps, a discrepancy) so the UI can be explored
+  and screenshotted without VALORANT; unit-test fixtures stay minimal.
