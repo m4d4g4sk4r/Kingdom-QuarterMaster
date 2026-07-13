@@ -60,6 +60,7 @@ def create_app(
     mock: bool = False,
     shard_override: str | None = None,
     force_refresh_static: bool = False,
+    demo: bool = False,
 ) -> FastAPI:
     app = FastAPI(title="Kingdom Quartermaster")
 
@@ -68,6 +69,7 @@ def create_app(
             shard_override=shard_override,
             force_refresh_static=force_refresh_static,
             mock=mock,
+            demo=demo,
         )
 
     for exc_type in _ERROR_STATUS:
@@ -157,8 +159,10 @@ def run_ui(
 
     import uvicorn
 
+    # `kqm ui --mock` serves the richer demo dataset (not the minimal unit-test
+    # fixtures), so the UI has a full roster to show without VALORANT installed.
     app = create_app(
-        mock=mock, shard_override=shard_override, force_refresh_static=force_refresh_static
+        demo=mock, shard_override=shard_override, force_refresh_static=force_refresh_static
     )
     url = f"http://127.0.0.1:{port}"
     threading.Timer(1.0, lambda: webbrowser.open(url)).start()

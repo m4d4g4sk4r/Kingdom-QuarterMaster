@@ -6,17 +6,28 @@ import { ErrorScreen, LoadingScreen } from "../components/StateScreen";
 import { progress, remainingCost } from "../lib/agent";
 import type { AgentGearStatus } from "../api/types";
 
-type SortKey = "closest" | "value" | "unrecruited";
+type SortKey = "closest" | "value";
+type FilterKey = "all" | "unrecruited";
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "closest", label: "Closest to done" },
   { key: "value", label: "Most locked value" },
+];
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: "all", label: "All agents" },
   { key: "unrecruited", label: "Not recruited" },
 ];
 
-function sortAgents(agents: AgentGearStatus[], key: SortKey): AgentGearStatus[] {
-  const copy = [...agents];
-  switch (key) {
+function arrangeAgents(
+  agents: AgentGearStatus[],
+  sort: SortKey,
+  filter: FilterKey,
+): AgentGearStatus[] {
+  const filtered =
+    filter === "unrecruited" ? agents.filter((a) => !a.recruited) : agents;
+  const copy = [...filtered];
+  switch (sort) {
     case "closest":
       return copy.sort((a, b) => {
         const pa = progress(a);
@@ -27,20 +38,17 @@ function sortAgents(agents: AgentGearStatus[], key: SortKey): AgentGearStatus[] 
       });
     case "value":
       return copy.sort((a, b) => remainingCost(b) - remainingCost(a));
-    case "unrecruited":
-      return copy.sort(
-        (a, b) => Number(a.recruited) - Number(b.recruited),
-      );
   }
 }
 
 export function Dashboard() {
   const { data, isPending, isError, error, refetch, isFetching } = useSnapshot();
   const [sort, setSort] = useState<SortKey>("closest");
+  const [filter, setFilter] = useState<FilterKey>("all");
 
   const agents = useMemo(
-    () => (data ? sortAgents(data.agents, sort) : []),
-    [data, sort],
+    () => (data ? arrangeAgents(data.agents, sort, filter) : []),
+    [data, sort, filter],
   );
 
   if (isPending) return <LoadingScreen />;
@@ -72,38 +80,81 @@ export function Dashboard() {
       </div>
 
       <section>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <h2 className="text-sm uppercase tracking-[0.22em] text-muted">
             Agent Manifest
+            <span className="tnum ml-3 text-paper/60">
+              {agents.length}
+              {filter !== "all" && (
+                <span className="text-muted"> of {data.agents.length}</span>
+              )}
+            </span>
           </h2>
-          <div className="flex flex-wrap gap-1">
-            {SORTS.map((s) => (
-              <button
-                key={s.key}
-                type="button"
-                onClick={() => setSort(s.key)}
-                className={[
-                  "border px-3 py-1.5 font-display text-[0.68rem] uppercase tracking-[0.12em] transition-colors",
-                  sort === s.key
-                    ? "border-amber text-amber"
-                    : "border-line text-muted hover:text-paper",
-                ].join(" ")}
-              >
-                {s.label}
-              </button>
-            ))}
+
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <div className="flex items-center gap-2">
+              <span className="font-display text-[0.58rem] uppercase tracking-[0.16em] text-muted">
+                Show
+              </span>
+              <div className="flex gap-1">
+                {FILTERS.map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => setFilter(f.key)}
+                    className={[
+                      "border px-3 py-1.5 font-display text-[0.68rem] uppercase tracking-[0.12em] transition-colors",
+                      filter === f.key
+                        ? "border-amber text-amber"
+                        : "border-line text-muted hover:text-paper",
+                    ].join(" ")}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="font-display text-[0.58rem] uppercase tracking-[0.16em] text-muted">
+                Sort
+              </span>
+              <div className="flex gap-1">
+                {SORTS.map((s) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => setSort(s.key)}
+                    className={[
+                      "border px-3 py-1.5 font-display text-[0.68rem] uppercase tracking-[0.12em] transition-colors",
+                      sort === s.key
+                        ? "border-amber text-amber"
+                        : "border-line text-muted hover:text-paper",
+                    ].join(" ")}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {agents.map((a) => (
-            <AgentCard
-              key={a.agent_uuid}
-              agent={a}
-              agentStatic={data.agents_static[a.agent_uuid]}
-            />
-          ))}
-        </div>
+        {agents.length === 0 ? (
+          <div className="border border-dashed border-line bg-steel/50 p-10 text-center text-sm text-muted">
+            Every agent on file is recruited — no outstanding recruitments.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {agents.map((a) => (
+              <AgentCard
+                key={a.agent_uuid}
+                agent={a}
+                agentStatic={data.agents_static[a.agent_uuid]}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

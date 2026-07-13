@@ -7,6 +7,20 @@ def test_fetch_snapshot_mock_returns_reconciled_agents():
     assert names == {"Gekko", "Fade"}
 
 
+def test_fetch_snapshot_demo_has_varied_roster():
+    # The demo dataset (used by `kqm ui --mock`) is a fuller, self-contained
+    # roster — separate from the minimal unit-test fixtures above.
+    snapshot = fetch_snapshot(demo=True)
+    assert len(snapshot.agents) >= 6
+    assert any(not a.recruited for a in snapshot.agents)  # a recruitment gap
+    assert any(a.discrepancies for a in snapshot.agents)  # at least one mismatch
+    # every agent carries art the UI can render
+    for a in snapshot.agents:
+        static = snapshot.agents_static[a.agent_uuid]
+        assert static["fullPortrait"].startswith("https://")
+        assert static["backgroundGradientColors"]
+
+
 def test_fetch_snapshot_mock_balance_from_fixture_wallet():
     snapshot = fetch_snapshot(mock=True)
     assert snapshot.balance == 4700

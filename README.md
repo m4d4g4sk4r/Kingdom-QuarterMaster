@@ -2,12 +2,17 @@
 
 > *Kingdom Corporation keeps the ledger. The Quartermaster issues the gear.*
 
-A local, **read-only** CLI that tracks your VALORANT agent gear: which
-contract rewards you've already unlocked, which are still locked and what
-each remaining tier costs in Kingdom Credits (KC), and — given your current
-KC balance — which purchases give you the most value right now.
+A local, **read-only** CLI **and web UI** that tracks your VALORANT agent
+gear: which contract rewards you've already unlocked, which are still locked
+and what each remaining tier costs in Kingdom Credits (KC), and — given your
+current KC balance — which purchases give you the most value right now.
 
 [![CI](https://github.com/m4d4g4sk4r/Kingdom-QuarterMaster/actions/workflows/ci.yml/badge.svg)](https://github.com/m4d4g4sk4r/Kingdom-QuarterMaster/actions/workflows/ci.yml)
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Kingdom Quartermaster — the requisition terminal dashboard" width="900">
+</p>
+<p align="center"><sub><code>kqm ui</code> — the requisition terminal: your operating budget, and every agent's gear contract on one manifest.</sub></p>
 
 > **This project is not endorsed by or affiliated with Riot Games. It uses
 > unofficial, undocumented client APIs, is read-only, and may stop working
@@ -43,6 +48,59 @@ makes is an HTTP `GET`.
   Kingdom Credits balance: 9,200 / 10,000
   ! You're near the KC cap — earnings past 10,000 are wasted.
 ```
+
+## The requisition terminal
+
+The web UI (`kqm ui`) is styled as an in-world Kingdom Corporation supply
+depot: the chrome stays a disciplined gunmetal grey, and colour enters only
+where an agent does. Everything is read-only — plans are drafted, never
+purchased. (Screenshots below use `kqm ui --mock`, so no VALORANT is
+needed to look around.)
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="docs/screenshots/agent-detail.png"><img src="docs/screenshots/agent-detail.png" alt="Agent detail — the 10-tier requisition track"></a>
+      <p><b>Agent detail.</b> The contract as a ten-tier requisition track:
+      what's been <em>issued</em>, the single tier cleared for
+      <em>authorization</em> next, and what's still <em>pending</em> — with
+      ownership discrepancies flagged as manifest notes.</p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="docs/screenshots/planner-best-value.png"><img src="docs/screenshots/planner-best-value.png" alt="Requisition planner — best value"></a>
+      <p><b>Best-value planner.</b> A draft requisition ordered by value per
+      credit, with the running balance drawn down line by line. Tune the
+      priority weights and it re-drafts live.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="docs/screenshots/planner-goal.png"><img src="docs/screenshots/planner-goal.png" alt="Requisition planner — goal mode"></a>
+      <p><b>Goal mode.</b> Cost out a single agent's full unlock: total to
+      finish, what's affordable now, the shortfall, and whether they still
+      need recruiting.</p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="docs/screenshots/filter-not-recruited.png"><img src="docs/screenshots/filter-not-recruited.png" alt="Manifest filtered to not-recruited agents"></a>
+      <p><b>Filter the manifest.</b> Sort by closest-to-done or most locked
+      value, or filter down to just the agents you haven't recruited yet.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="docs/screenshots/offline-state.png"><img src="docs/screenshots/offline-state.png" alt="Offline state — the line is severed"></a>
+      <p><b>Every state has a home.</b> When VALORANT isn't running or the
+      line drops, you get a clear, in-character screen telling you exactly
+      what to do — never a blank page or a raw stack trace.</p>
+    </td>
+    <td width="50%" valign="top">
+      <br>
+      <p>The full design direction — palette, type, the "colour only where an
+      agent does" rule — is written up in
+      <a href="frontend/DESIGN_BRIEF.md">frontend/DESIGN_BRIEF.md</a>.</p>
+    </td>
+  </tr>
+</table>
 
 ## Requirements
 
